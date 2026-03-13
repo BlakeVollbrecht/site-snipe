@@ -9,7 +9,9 @@ export function Schedule() {
   const handleSchedule = () => {
     if (!time) return;
 
-    scheduleClickAt(time);
+    scheduleClickAt(time, () => {
+      setScheduled(false);
+    });
     setScheduled(true);
   };
 

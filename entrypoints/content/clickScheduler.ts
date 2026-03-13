@@ -5,7 +5,7 @@ export function setClickTargetResolver(resolver: () => Element | null) {
   getClickTarget = resolver;
 }
 
-export function scheduleClickAt(time: string) {
+export function scheduleClickAt(time: string, onClickFired?: () => void) {
   const targetElement = getClickTarget();
   if (!targetElement) return;
 
@@ -42,6 +42,9 @@ export function scheduleClickAt(time: string) {
       );
     }
     clickTimeoutId = null;
+    if (onClickFired) {
+      onClickFired();
+    }
   }, delay);
 }
 
