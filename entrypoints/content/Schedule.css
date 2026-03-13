@@ -1,0 +1,51 @@
+.site-snipe-schedule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.site-snipe-schedule--armed {
+  justify-content: flex-start;
+}
+
+.site-snipe-schedule-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.site-snipe-schedule-time-input {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: transparent;
+  color: inherit;
+}
+
+.site-snipe-schedule-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background: #ff9800;
+  color: #000;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.site-snipe-schedule-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.site-snipe-schedule-summary {
+  font-size: 13px;
+}
+
+.site-snipe-schedule-time-value {
+  font-weight: 600;
+}
+

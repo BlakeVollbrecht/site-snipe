@@ -1,0 +1,54 @@
+let clickTimeoutId: number | null = null;
+let getClickTarget: () => Element | null = () => null;
+
+export function setClickTargetResolver(resolver: () => Element | null) {
+  getClickTarget = resolver;
+}
+
+export function scheduleClickAt(time: string) {
+  const targetElement = getClickTarget();
+  if (!targetElement) return;
+
+  if (clickTimeoutId !== null) {
+    window.clearTimeout(clickTimeoutId);
+    clickTimeoutId = null;
+  }
+
+  const [hoursStr, minutesStr] = time.split(':');
+  const hours = Number(hoursStr);
+  const minutes = Number(minutesStr);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return;
+
+  const now = new Date();
+  const target = new Date();
+  target.setHours(hours, minutes, 0, 0);
+
+  // If the time has already passed today, schedule for tomorrow
+  if (target.getTime() <= now.getTime()) {
+    target.setDate(target.getDate() + 1);
+  }
+
+  const delay = target.getTime() - now.getTime();
+
+  clickTimeoutId = window.setTimeout(() => {
+    const element = getClickTarget();
+    if (element && document.contains(element)) {
+      element.dispatchEvent(
+        new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+        }),
+      );
+    }
+    clickTimeoutId = null;
+  }, delay);
+}
+
+export function disarmClickTimer() {
+  if (clickTimeoutId !== null) {
+    window.clearTimeout(clickTimeoutId);
+    clickTimeoutId = null;
+  }
+}
+

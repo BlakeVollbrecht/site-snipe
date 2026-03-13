@@ -1,4 +1,5 @@
 import { injectPanelAfter } from './content/InjectedPanelRoot';
+import { disarmClickTimer, scheduleClickAt, setClickTargetResolver } from './content/clickScheduler';
 
 let clickedElement: Element | null = null;
 let currentAnchorElement: Element | null = null;
@@ -47,6 +48,8 @@ function armElementSelection() {
 export default defineContentScript({
   matches: ['*://*.spellionaire.com/*'],
   main() {
+    setClickTargetResolver(() => clickedElement);
+
     browser.runtime.onMessage.addListener((message) => {
       if (message?.type === 'arm-element-selection') {
         armElementSelection();
