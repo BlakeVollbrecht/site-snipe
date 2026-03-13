@@ -4,14 +4,20 @@ import { Panel } from './Panel';
 
 let currentPanelContainer: HTMLElement | null = null;
 
-export function injectPanelAfter(anchor: Element) {
+export function injectPanelAfter(anchor: Element | null) {
   if (currentPanelContainer) {
     currentPanelContainer.remove();
     currentPanelContainer = null;
   }
 
   const container = document.createElement('div');
-  anchor.insertAdjacentElement('afterend', container);
+
+  if (anchor) {
+    anchor.insertAdjacentElement('afterend', container);
+  } else {
+    document.body.prepend(container);
+  }
+
   currentPanelContainer = container;
 
   ReactDOM.createRoot(container).render(

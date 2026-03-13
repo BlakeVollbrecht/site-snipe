@@ -78,5 +78,19 @@ export default defineContentScript({
         }, 1400);
       }
     });
+
+    if (!clickedElement) {
+      if (document.readyState === 'loading') {
+        window.addEventListener(
+          'DOMContentLoaded',
+          () => {
+            injectPanelAfter(null);
+          },
+          { once: true },
+        );
+      } else {
+        injectPanelAfter(null);
+      }
+    }
   },
 });
