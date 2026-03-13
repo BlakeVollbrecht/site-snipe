@@ -1,9 +1,8 @@
 .site-snipe-panel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 999999;
+  box-sizing: border-box;
+  width: 100%;
+  display: block;
+  margin: 12px 0;
   padding: 8px 12px;
   background: rgba(0, 0, 0, 0.85);
   color: #fff;
@@ -11,4 +10,3 @@
   font-size: 14px;
   text-align: center;
 }
-
