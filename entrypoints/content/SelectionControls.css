@@ -1,0 +1,19 @@
+.site-snipe-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+  justify-content: flex-start;
+}
+
+.site-snipe-selection-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background: #4caf50;
+  color: #000;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
