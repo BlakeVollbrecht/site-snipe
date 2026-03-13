@@ -1,6 +1,8 @@
+import { injectPanel } from './content/InjectedPanelRoot';
+
 export default defineContentScript({
   matches: ['*://*.spellionaire.com/*'],
   main() {
-    console.log('Hello content.');
+    injectPanel();
   },
 });
