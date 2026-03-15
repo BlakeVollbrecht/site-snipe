@@ -27,3 +27,10 @@ export function injectPanelAfter(anchor: Element | null) {
   );
 }
 
+export function removePanel() {
+  if (currentPanelContainer) {
+    currentPanelContainer.remove();
+    currentPanelContainer = null;
+  }
+}
+

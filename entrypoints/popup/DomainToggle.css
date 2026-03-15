@@ -1,0 +1,22 @@
+.domain-toggle {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.domain-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.domain-toggle-label {
+  user-select: none;
+}
+
+.domain-toggle-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
