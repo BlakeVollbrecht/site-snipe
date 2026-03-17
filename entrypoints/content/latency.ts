@@ -42,7 +42,7 @@ export async function calibrateWithMyCloudFunction(samples = 200): Promise<Laten
   return {
     meanOffset: Math.round(mean),
     stdDev: Math.round(stdDev),
-    lead2sigma: Math.round(mean + 2 * stdDev),
-    lead3sigma: Math.round(mean + 3 * stdDev),
+    lead2sigma: Math.round(mean - 2 * stdDev),
+    lead3sigma: Math.round(mean - 3 * stdDev),
   };
 }
