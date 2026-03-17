@@ -4,12 +4,16 @@ import { disarmClickTimer, scheduleClickAt } from './clickScheduler';
 
 export function Schedule() {
   const [time, setTime] = useState('');
+  const [leadMs, setLeadMs] = useState('0');
   const [scheduled, setScheduled] = useState(false);
 
   const handleSchedule = () => {
     if (!time) return;
 
-    scheduleClickAt(time, () => {
+    const parsedLead = Number(leadMs);
+    const safeLead = Number.isFinite(parsedLead) && parsedLead >= 0 ? parsedLead : 0;
+
+    scheduleClickAt(time, safeLead, () => {
       setScheduled(false);
     });
     setScheduled(true);
@@ -24,7 +28,7 @@ export function Schedule() {
     return (
       <div className="site-snipe-schedule site-snipe-schedule--armed">
         <div className="site-snipe-schedule-summary">
-          Drop time set to <span className="site-snipe-schedule-time-value">{time}</span>
+          Drop time {time} with lead {leadMs} ms
         </div>
         <button className="site-snipe-schedule-button" onClick={handleCancel}>
           Cancel
@@ -42,6 +46,16 @@ export function Schedule() {
           type="time"
           value={time}
           onChange={(event) => setTime(event.target.value)}
+        />
+      </label>
+      <label className="site-snipe-schedule-label">
+        Lead time (ms)
+        <input
+          className="site-snipe-schedule-time-input"
+          type="number"
+          min="0"
+          value={leadMs}
+          onChange={(event) => setLeadMs(event.target.value)}
         />
       </label>
       <button
