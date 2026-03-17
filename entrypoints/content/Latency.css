@@ -6,6 +6,10 @@
   font-size: 13px;
 }
 
+.site-snipe-latency-section {
+  margin-bottom: 10px;
+}
+
 .site-snipe-latency-header {
   display: flex;
   align-items: center;
