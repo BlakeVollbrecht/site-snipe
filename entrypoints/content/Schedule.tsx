@@ -24,7 +24,7 @@ export function Schedule() {
     return (
       <div className="site-snipe-schedule site-snipe-schedule--armed">
         <div className="site-snipe-schedule-summary">
-          Click scheduled for <span className="site-snipe-schedule-time-value">{time}</span>
+          Drop time set to <span className="site-snipe-schedule-time-value">{time}</span>
         </div>
         <button className="site-snipe-schedule-button" onClick={handleCancel}>
           Cancel
@@ -36,7 +36,7 @@ export function Schedule() {
   return (
     <div className="site-snipe-schedule">
       <label className="site-snipe-schedule-label">
-        Click time
+        Drop time
         <input
           className="site-snipe-schedule-time-input"
           type="time"
