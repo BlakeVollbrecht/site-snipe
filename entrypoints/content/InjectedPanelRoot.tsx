@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Panel } from './Panel';
+import '../../assets/tailwind.css';
 
 let currentPanelContainer: HTMLElement | null = null;
 
