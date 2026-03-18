@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { LatencyStats } from './latency';
 import { measureCurrentPageLatency } from './latency';
 import { Button } from '@/components/ui/button';
+import { HistogramWithNormalCurve } from '@/components/charts/HistogramWithNormalCurve';
 
 const MAX_SAMPLES = 200;
 
@@ -19,27 +20,29 @@ function computeStats(samples: number[]): LatencyStats {
   };
 }
 
-function LatencyStatsView({ stats }: { stats: LatencyStats | null }) {
+function LatencyStatsView({
+  stats,
+  samples,
+}: {
+  stats: LatencyStats | null;
+  samples: number[];
+}) {
   if (!stats) return null;
+
   return (
-    <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-      <div>
-        <dt className="font-medium">Mean (ms)</dt>
-        <dd className="font-mono tabular-nums">{stats.meanOffset}</dd>
-      </div>
-      <div>
-        <dt className="font-medium">Std dev (ms)</dt>
-        <dd className="font-mono tabular-nums">{stats.stdDev}</dd>
-      </div>
-      <div>
-        <dt className="font-medium">Mean + 2σ (ms)</dt>
-        <dd className="font-mono tabular-nums">{stats.lead2sigma}</dd>
-      </div>
-      <div>
-        <dt className="font-medium">Mean + 3σ (ms)</dt>
-        <dd className="font-mono tabular-nums">{stats.lead3sigma}</dd>
-      </div>
-    </dl>
+    <div className="space-y-2">
+      <HistogramWithNormalCurve samples={samples} />
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        <div>
+          <dt className="font-medium">Std dev (ms)</dt>
+          <dd className="font-mono tabular-nums">{stats.stdDev}</dd>
+        </div>
+        <div>
+          <dt className="font-medium"># samples</dt>
+          <dd className="font-mono tabular-nums">{samples.length}</dd>
+        </div>
+      </dl>
+    </div>
   );
 }
 
@@ -130,7 +133,7 @@ function LatencyMeasureSection({
         </div>
       </div>
       {error && <div className="text-xs text-destructive">{error}</div>}
-      <LatencyStatsView stats={stats} />
+      <LatencyStatsView stats={stats} samples={samplesRef.current} />
       {!stats && !error && !running && (
         <p className="text-xs text-muted-foreground">{hint}</p>
       )}
