@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import './Schedule.css';
 import { disarmClickTimer, scheduleClickAt} from './clickScheduler';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 export function Schedule() {
   const [time, setTime] = useState('');
@@ -28,52 +29,46 @@ export function Schedule() {
 
   if (scheduled) {
     return (
-      <div className="site-snipe-schedule site-snipe-schedule--armed">
-        <div className="site-snipe-schedule-summary">
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-sm font-medium">
           Drop time {time} with lead {leadMs} ms
         </div>
-        <button className="site-snipe-schedule-button" onClick={handleCancel}>
+        <Button size="sm" variant="secondary" onClick={handleCancel}>
           Cancel
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="site-snipe-schedule">
-        <label className="site-snipe-schedule-label">
-          Drop time
-          <input
-            className="site-snipe-schedule-time-input"
+    <div className="space-y-2">
+      <div className="flex items-end gap-3">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">Drop time</span>
+          <Input
+            className="h-9 text-sm"
             type="time"
             value={time}
             onChange={(event) => setTime(event.target.value)}
           />
         </label>
-        <label className="site-snipe-schedule-label">
-          Lead time (ms)
-          <input
-            className="site-snipe-schedule-time-input"
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium">Lead (ms)</span>
+          <Input
+            className="h-9 text-sm"
             type="number"
             min="0"
             value={leadMs}
             onChange={(event) => setLeadMs(event.target.value)}
           />
         </label>
-        <button
-          className="site-snipe-schedule-button"
-          onClick={handleSchedule}
-          disabled={!time}
-        >
+        <Button size="lg" onClick={handleSchedule} disabled={!time}>
           Schedule
-        </button>
+        </Button>
       </div>
       {lastClickIso && (
-        <div>
-          <p className="site-snipe-schedule-note">
-            Last click at {lastClickIso}
-          </p>
+        <div className="text-xs text-muted-foreground">
+          Last click at {lastClickIso}
         </div>
       )}
     </div>

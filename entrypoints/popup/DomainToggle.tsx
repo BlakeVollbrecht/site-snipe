@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './DomainToggle.css';
 import { isDomainEnabled, setDomainEnabled } from '../content/domainSettings';
 
 export function DomainToggle() {
@@ -39,17 +38,20 @@ export function DomainToggle() {
   const isLoading = enabled === null;
 
   return (
-    <div className="domain-toggle">
-      <label className="domain-toggle-row">
+    <div className="space-y-2 text-left">
+      <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
           checked={!!enabled}
           disabled={isLoading || !url}
           onChange={handleToggle}
+          className="h-4 w-4 rounded border-input accent-primary text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:opacity-60 disabled:cursor-not-allowed"
         />
-        <span className="domain-toggle-label">Enable panel on this site</span>
+        <span className="select-none">Enable panel on this site</span>
       </label>
-      <p className="domain-toggle-note">Toggles immediately for this tab and remembers this site.</p>
+      <p className="text-xs text-muted-foreground">
+        Toggles immediately for this tab and remembers this site.
+      </p>
     </div>
   );
 }

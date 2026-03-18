@@ -4,6 +4,25 @@ import { setClickTargetResolver } from './clickScheduler';
 let clickedElement: Element | null = null;
 let highlightTimeoutId: number | null = null;
 
+const HIGHLIGHT_CLASSES = [
+  // Ring-based highlight avoids custom CSS and works on arbitrary DOM elements.
+  'ring-2',
+  'ring-orange-400',
+  'ring-offset-2',
+  'ring-offset-transparent',
+  'animate-pulse',
+];
+
+function applyHighlight(el: HTMLElement) {
+  for (const cls of HIGHLIGHT_CLASSES) el.classList.remove(cls);
+  void el.offsetWidth; // restart the animation by forcing reflow
+  for (const cls of HIGHLIGHT_CLASSES) el.classList.add(cls);
+}
+
+function clearHighlight(el: HTMLElement) {
+  for (const cls of HIGHLIGHT_CLASSES) el.classList.remove(cls);
+}
+
 function findRowAnchor(element: Element): Element {
   let current: HTMLElement | null = element as HTMLElement;
   const pageWidth = document.documentElement.clientWidth || window.innerWidth;
@@ -57,12 +76,10 @@ export function highlightSelection() {
     highlightTimeoutId = null;
   }
 
-  el.classList.remove('site-snipe-highlight-target');
-  void el.offsetWidth;
-  el.classList.add('site-snipe-highlight-target');
+  applyHighlight(el);
 
   highlightTimeoutId = window.setTimeout(() => {
-    el.classList.remove('site-snipe-highlight-target');
+    clearHighlight(el);
     highlightTimeoutId = null;
   }, 1400);
 }

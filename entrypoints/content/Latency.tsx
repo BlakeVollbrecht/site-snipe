@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import './Latency.css';
 import type { LatencyStats } from './latency';
 import { measureCurrentPageLatency } from './latency';
+import { Button } from '@/components/ui/button';
 
 const MAX_SAMPLES = 200;
 
@@ -22,22 +22,22 @@ function computeStats(samples: number[]): LatencyStats {
 function LatencyStatsView({ stats }: { stats: LatencyStats | null }) {
   if (!stats) return null;
   return (
-    <dl className="site-snipe-latency-stats">
+    <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
       <div>
-        <dt>Mean (ms)</dt>
-        <dd>{stats.meanOffset}</dd>
+        <dt className="font-medium">Mean (ms)</dt>
+        <dd className="font-mono tabular-nums">{stats.meanOffset}</dd>
       </div>
       <div>
-        <dt>Std dev (ms)</dt>
-        <dd>{stats.stdDev}</dd>
+        <dt className="font-medium">Std dev (ms)</dt>
+        <dd className="font-mono tabular-nums">{stats.stdDev}</dd>
       </div>
       <div>
-        <dt>Mean + 2σ (ms)</dt>
-        <dd>{stats.lead2sigma}</dd>
+        <dt className="font-medium">Mean + 2σ (ms)</dt>
+        <dd className="font-mono tabular-nums">{stats.lead2sigma}</dd>
       </div>
       <div>
-        <dt>Mean + 3σ (ms)</dt>
-        <dd>{stats.lead3sigma}</dd>
+        <dt className="font-medium">Mean + 3σ (ms)</dt>
+        <dd className="font-mono tabular-nums">{stats.lead3sigma}</dd>
       </div>
     </dl>
   );
@@ -117,28 +117,23 @@ function LatencyMeasureSection({
   }, []);
 
   return (
-    <section className="site-snipe-latency-section">
-      <div className="site-snipe-latency-header">
-        <span>{title}</span>
-        <div className="site-snipe-latency-actions">
-          <button
-            className="site-snipe-button site-snipe-button--latency"
-            onClick={handleToggle}
-          >
+    <section className="mt-3 pt-2 border-t border-border">
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="text-sm font-medium">{title}</span>
+        <div className="flex items-center gap-2">
+          <Button size="sm" onClick={handleToggle}>
             {running ? 'Stop' : 'Measure'}
-          </button>
-          <button
-            className="site-snipe-button site-snipe-button--muted"
-            onClick={handleReset}
-            type="button"
-          >
+          </Button>
+          <Button size="sm" variant="secondary" onClick={handleReset} type="button">
             Reset
-          </button>
+          </Button>
         </div>
       </div>
-      {error && <div className="site-snipe-latency-error">{error}</div>}
+      {error && <div className="text-xs text-destructive">{error}</div>}
       <LatencyStatsView stats={stats} />
-      {!stats && !error && !running && <p className="site-snipe-latency-hint">{hint}</p>}
+      {!stats && !error && !running && (
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      )}
     </section>
   );
 }
@@ -171,7 +166,7 @@ function CurrentPageLatencySection() {
 
 export function Latency() {
   return (
-    <div className="site-snipe-latency">
+    <div className="space-y-3">
       <h2 className="text-lg font-medium">Latency</h2>
       <OwnServerLatencySection />
       <CurrentPageLatencySection />

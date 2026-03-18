@@ -1,4 +1,4 @@
-import './SelectionControls.css';
+import { Button } from '@/components/ui/button';
 import { armElementSelection, highlightSelection } from './selection';
 
 export function SelectionControls() {
@@ -11,13 +11,13 @@ export function SelectionControls() {
   };
 
   return (
-    <div className="site-snipe-selection">
-      <button className="site-snipe-selection-button" onClick={handleSelectClick}>
+    <div className="flex flex-wrap gap-2 mb-2">
+      <Button size="sm" onClick={handleSelectClick}>
         Select element on page
-      </button>
-      <button className="site-snipe-selection-button" onClick={handleHighlightClick}>
+      </Button>
+      <Button size="sm" variant="secondary" onClick={handleHighlightClick}>
         Highlight selected element
-      </button>
+      </Button>
     </div>
   );
 }
