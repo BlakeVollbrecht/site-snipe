@@ -172,6 +172,7 @@ function CurrentPageLatencySection() {
 export function Latency() {
   return (
     <div className="site-snipe-latency">
+      <h2 className="text-lg font-medium">Latency</h2>
       <OwnServerLatencySection />
       <CurrentPageLatencySection />
     </div>
