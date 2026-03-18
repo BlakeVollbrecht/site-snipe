@@ -7,7 +7,26 @@ export type LatencyStats = {
   lead3sigma: number;
 };
 
-export async function calibrateWithMyCloudFunction(samples = 200): Promise<LatencyStats> {
+async function measureUrlRTTOnce(url: string): Promise<number> {
+  const start = performance.now();
+  try {
+    await fetch(url, {
+      method: 'HEAD',
+      cache: 'no-store',
+    });
+  } catch {
+    await fetch(url, {
+      method: 'GET',
+      cache: 'no-store',
+    });
+  }
+  const end = performance.now();
+  return end - start;
+}
+
+export async function calibrateWithMyCloudFunction(
+  samples = 200,
+): Promise<LatencyStats> {
   if (!LATENCY_URL) {
     throw new Error('LATENCY_URL is not configured');
   }
@@ -20,18 +39,18 @@ export async function calibrateWithMyCloudFunction(samples = 200): Promise<Laten
       cache: 'no-store',
     });
 
-    if (i === 0) {
-        continue; // throw away the first sample since server may be waking up
-    }
-
     const data = await res.json();
     const serverMs = new Date(data.serverReceiveTime).getTime();
     const localMs = Date.now();
 
     const offsetMs = serverMs - localMs;
-
     offsets.push(offsetMs);
+
     await new Promise((r) => setTimeout(r, 10));
+  }
+
+  if (offsets.length === 0) {
+    throw new Error('No latency samples collected for own server');
   }
 
   const mean = offsets.reduce((a, b) => a + b, 0) / offsets.length;
@@ -47,30 +66,19 @@ export async function calibrateWithMyCloudFunction(samples = 200): Promise<Laten
   };
 }
 
-export async function measureCurrentPageLatency(samples = 50): Promise<LatencyStats> {
+export async function measureCurrentPageLatency(
+  samples = 50,
+): Promise<LatencyStats> {
   const offsets: number[] = [];
 
   for (let i = 0; i < samples; i++) {
-    const start = performance.now();
     try {
-      await fetch(window.location.href, {
-        method: 'HEAD',
-        cache: 'no-store',
-      });
+      const rttMs = await measureUrlRTTOnce(window.location.href);
+      const oneWayMs = rttMs / 2;
+      offsets.push(oneWayMs);
     } catch {
-      try {
-        await fetch(window.location.href, {
-          method: 'GET',
-          cache: 'no-store',
-        });
-      } catch {
-        continue;
-      }
+      // ignore failed sample
     }
-    const end = performance.now();
-
-    const rttMs = end - start;
-    offsets.push(rttMs);
     await new Promise((r) => setTimeout(r, 10));
   }
 

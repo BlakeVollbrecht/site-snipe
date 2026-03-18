@@ -3,162 +3,177 @@ import './Latency.css';
 import type { LatencyStats } from './latency';
 import { measureCurrentPageLatency } from './latency';
 
-export function Latency() {
-  const [ownStats, setOwnStats] = useState<LatencyStats | null>(null);
-  const [ownLoading, setOwnLoading] = useState(false);
-  const [ownError, setOwnError] = useState<string | null>(null);
+const MAX_SAMPLES = 200;
 
-  const [pageStats, setPageStats] = useState<LatencyStats | null>(null);
-  const [pageError, setPageError] = useState<string | null>(null);
-  const [pageRunning, setPageRunning] = useState(false);
+function computeStats(samples: number[]): LatencyStats {
+  const mean = samples.reduce((a, b) => a + b, 0) / samples.length;
+  const variance =
+    samples.reduce((sq, n) => sq + (n - mean) ** 2, 0) / (samples.length - 1 || 1);
+  const stdDev = Math.sqrt(variance);
 
-  const pageSamplesRef = useRef<number[]>([]);
-  const pageTimerRef = useRef<number | null>(null);
-  const pageRunningRef = useRef(false);
+  return {
+    meanOffset: Math.round(mean),
+    stdDev: Math.round(stdDev),
+    lead2sigma: Math.round(mean + 2 * stdDev),
+    lead3sigma: Math.round(mean + 3 * stdDev),
+  };
+}
 
-  const computeStats = (samples: number[]): LatencyStats => {
-    const mean = samples.reduce((a, b) => a + b, 0) / samples.length;
-    const variance =
-      samples.reduce((sq, n) => sq + (n - mean) ** 2, 0) / (samples.length - 1 || 1);
-    const stdDev = Math.sqrt(variance);
+function LatencyStatsView({ stats }: { stats: LatencyStats | null }) {
+  if (!stats) return null;
+  return (
+    <dl className="site-snipe-latency-stats">
+      <div>
+        <dt>Mean (ms)</dt>
+        <dd>{stats.meanOffset}</dd>
+      </div>
+      <div>
+        <dt>Std dev (ms)</dt>
+        <dd>{stats.stdDev}</dd>
+      </div>
+      <div>
+        <dt>Mean + 2σ (ms)</dt>
+        <dd>{stats.lead2sigma}</dd>
+      </div>
+      <div>
+        <dt>Mean + 3σ (ms)</dt>
+        <dd>{stats.lead3sigma}</dd>
+      </div>
+    </dl>
+  );
+}
 
-    return {
-      meanOffset: Math.round(mean),
-      stdDev: Math.round(stdDev),
-      lead2sigma: Math.round(mean + 2 * stdDev),
-      lead3sigma: Math.round(mean + 3 * stdDev),
-    };
+function LatencyMeasureSection({
+  title,
+  hint,
+  measureOnce,
+  getNextDelayMs,
+}: {
+  title: string;
+  hint: string;
+  measureOnce: () => Promise<LatencyStats>;
+  getNextDelayMs: () => number;
+}) {
+  const [stats, setStats] = useState<LatencyStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [running, setRunning] = useState(false);
+
+  const samplesRef = useRef<number[]>([]);
+  const timerRef = useRef<number | null>(null);
+  const runningRef = useRef(false);
+
+  const handleReset = () => {
+    samplesRef.current = [];
+    setStats(null);
+    setError(null);
   };
 
-  const handleMeasureOwn = async () => {
-    setOwnLoading(true);
-    setOwnError(null);
+  const doMeasureOnce = async () => {
     try {
-      const result = (await browser.runtime.sendMessage({
-        type: 'site-snipe:get-latency-stats',
-      })) as LatencyStats;
-      setOwnStats(result);
-    } catch (e) {
-      setOwnError(e instanceof Error ? e.message : 'Failed to measure latency');
-    } finally {
-      setOwnLoading(false);
-    }
-  };
-
-  const measurePageOnce = async () => {
-    try {
-      const result = await measureCurrentPageLatency(1);
+      const result = await measureOnce();
       const sample = result.meanOffset;
 
-      pageSamplesRef.current = [...pageSamplesRef.current, sample].slice(-25);
-      setPageStats(computeStats(pageSamplesRef.current));
+      samplesRef.current = [...samplesRef.current, sample].slice(-MAX_SAMPLES);
+      setStats(computeStats(samplesRef.current));
     } catch (e) {
-      setPageError(e instanceof Error ? e.message : 'Failed to measure page latency');
+      setError(e instanceof Error ? e.message : 'Failed to measure latency');
     }
   };
 
-  const scheduleNextPageMeasurement = () => {
-    if (!pageRunningRef.current) return;
-    const delay = 5000 + Math.random() * 10000; // 5-15 seconds
-    pageTimerRef.current = window.setTimeout(async () => {
-      await measurePageOnce();
-      scheduleNextPageMeasurement();
-    }, delay);
+  const scheduleNext = () => {
+    if (!runningRef.current) return;
+    timerRef.current = window.setTimeout(async () => {
+      await doMeasureOnce();
+      scheduleNext();
+    }, getNextDelayMs());
   };
 
-  const handleTogglePage = async () => {
-    if (pageRunningRef.current) {
-      pageRunningRef.current = false;
-      setPageRunning(false);
-      if (pageTimerRef.current !== null) {
-        window.clearTimeout(pageTimerRef.current);
-        pageTimerRef.current = null;
+  const handleToggle = async () => {
+    if (runningRef.current) {
+      runningRef.current = false;
+      setRunning(false);
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
       return;
     }
 
-    pageRunningRef.current = true;
-    setPageRunning(true);
-    pageError && setPageError(null);
-    await measurePageOnce();
-    scheduleNextPageMeasurement();
+    runningRef.current = true;
+    setRunning(true);
+    if (error) setError(null);
+    await doMeasureOnce();
+    scheduleNext();
   };
 
   useEffect(() => {
     return () => {
-      pageRunningRef.current = false;
-      if (pageTimerRef.current !== null) {
-        window.clearTimeout(pageTimerRef.current);
-        pageTimerRef.current = null;
+      runningRef.current = false;
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+        timerRef.current = null;
       }
     };
   }, []);
 
-  const renderStats = (stats: LatencyStats | null) => {
-    if (!stats) return null;
-    return (
-      <dl className="site-snipe-latency-stats">
-        <div>
-          <dt>Mean (ms)</dt>
-          <dd>{stats.meanOffset}</dd>
-        </div>
-        <div>
-          <dt>Std dev (ms)</dt>
-          <dd>{stats.stdDev}</dd>
-        </div>
-        <div>
-          <dt>Mean + 2σ (ms)</dt>
-          <dd>{stats.lead2sigma}</dd>
-        </div>
-        <div>
-          <dt>Mean + 3σ (ms)</dt>
-          <dd>{stats.lead3sigma}</dd>
-        </div>
-      </dl>
-    );
-  };
-
   return (
-    <div className="site-snipe-latency">
-      <section className="site-snipe-latency-section">
-        <div className="site-snipe-latency-header">
-          <span>Own server</span>
+    <section className="site-snipe-latency-section">
+      <div className="site-snipe-latency-header">
+        <span>{title}</span>
+        <div className="site-snipe-latency-actions">
           <button
-            className="site-snipe-latency-button"
-            onClick={handleMeasureOwn}
-            disabled={ownLoading}
+            className="site-snipe-button site-snipe-button--latency"
+            onClick={handleToggle}
           >
-            {ownLoading ? 'Measuring…' : 'Measure'}
+            {running ? 'Stop' : 'Measure'}
+          </button>
+          <button
+            className="site-snipe-button site-snipe-button--muted"
+            onClick={handleReset}
+            type="button"
+          >
+            Reset
           </button>
         </div>
-        {ownError && <div className="site-snipe-latency-error">{ownError}</div>}
-        {renderStats(ownStats)}
-        {!ownStats && !ownError && !ownLoading && (
-          <p className="site-snipe-latency-hint">
-            Click Measure to compute latency vs your own server.
-          </p>
-        )}
-      </section>
-
-      <section className="site-snipe-latency-section">
-        <div className="site-snipe-latency-header">
-          <span>Current page</span>
-          <button
-            className="site-snipe-latency-button"
-            onClick={handleTogglePage}
-          >
-            {pageRunning ? 'Stop' : 'Measure'}
-          </button>
-        </div>
-        {pageError && <div className="site-snipe-latency-error">{pageError}</div>}
-        {renderStats(pageStats)}
-        {!pageStats && !pageError && !pageRunning && (
-          <p className="site-snipe-latency-hint">
-            Click Measure to start live round-trip latency sampling for this page.
-          </p>
-        )}
-      </section>
-    </div>
+      </div>
+      {error && <div className="site-snipe-latency-error">{error}</div>}
+      <LatencyStatsView stats={stats} />
+      {!stats && !error && !running && <p className="site-snipe-latency-hint">{hint}</p>}
+    </section>
   );
 }
 
+function OwnServerLatencySection() {
+  return (
+    <LatencyMeasureSection
+      title="Own server"
+      hint="Click Measure to compute latency vs your own server."
+      measureOnce={async () =>
+        (await browser.runtime.sendMessage({
+          type: 'site-snipe:get-latency-stats',
+          samples: 1,
+        })) as LatencyStats}
+      getNextDelayMs={() => 1000}
+    />
+  );
+}
+
+function CurrentPageLatencySection() {
+  return (
+    <LatencyMeasureSection
+      title="Current page"
+      hint="Click Measure to start live round-trip latency sampling for this page."
+      measureOnce={() => measureCurrentPageLatency(1)}
+      getNextDelayMs={() => 250 + Math.random() * 500}
+    />
+  );
+}
+
+export function Latency() {
+  return (
+    <div className="site-snipe-latency">
+      <OwnServerLatencySection />
+      <CurrentPageLatencySection />
+    </div>
+  );
+}
