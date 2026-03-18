@@ -1,5 +1,10 @@
 import { Button } from '@/components/ui/button';
-import { armElementSelection, highlightSelection, isElementSelected } from './selection';
+import {
+  armElementSelection,
+  highlightSelection,
+  isElementSelected,
+  isSelectionArmed,
+} from './selection';
 
 export function SelectionControls() {
   const handleSelectClick = () => {
@@ -12,7 +17,7 @@ export function SelectionControls() {
 
   return (
     <div className="flex flex-wrap gap-2 mb-2">
-      <Button size="sm" onClick={handleSelectClick}>
+      <Button size="sm" onClick={handleSelectClick} disabled={isSelectionArmed()}>
         Select element on page
       </Button>
       <Button

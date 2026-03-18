@@ -1,5 +1,5 @@
 import { injectPanelAfter, removePanel } from './content/InjectedPanelRoot';
-import { initSelection } from './content/selection';
+import { disarmElementSelection, initSelection } from './content/selection';
 import { isDomainEnabled } from './content/domainSettings';
 
 export default defineContentScript({
@@ -42,6 +42,7 @@ export default defineContentScript({
             injectPanelAfter(null);
           }
         } else {
+          disarmElementSelection();
           removePanel();
         }
       }
