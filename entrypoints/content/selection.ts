@@ -50,6 +50,10 @@ export function initSelection() {
   setClickTargetResolver(() => clickedElement);
 }
 
+export function isElementSelected() {
+  return clickedElement !== null;
+}
+
 export function armElementSelection() {
   function handleClick(event: MouseEvent) {
     event.preventDefault();

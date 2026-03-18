@@ -9,9 +9,9 @@ export function scheduleClickAt(
   time: string,
   leadMs: number,
   onClickFired?: (actualTimeIso: string) => void,
-) {
+): boolean {
   const targetElement = getClickTarget();
-  if (!targetElement) return;
+  if (!targetElement) return false;
 
   if (clickTimeoutId !== null) {
     window.clearTimeout(clickTimeoutId);
@@ -21,7 +21,7 @@ export function scheduleClickAt(
   const [hoursStr, minutesStr] = time.split(':');
   const hours = Number(hoursStr);
   const minutes = Number(minutesStr);
-  if (Number.isNaN(hours) || Number.isNaN(minutes)) return;
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) return false;
 
   const now = new Date();
   const target = new Date();
@@ -57,7 +57,7 @@ export function scheduleClickAt(
         onClickFired(new Date().toISOString());
       }
     }, delay);
-    return;
+    return true;
   }
 
   const coarseDelay = delay - coarseLeadMs;
@@ -87,6 +87,8 @@ export function scheduleClickAt(
       onClickFired(new Date().toISOString());
     }
   }, coarseDelay);
+
+  return true;
 }
 
 export function disarmClickTimer() {
