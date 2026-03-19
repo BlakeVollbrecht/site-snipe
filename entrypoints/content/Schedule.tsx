@@ -4,6 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { isElementSelected } from './selection';
 
+function formatTime12h(timeHHmm: string): string {
+  // Input type="time" yields "HH:mm" (24h) in most browsers.
+  const match = /^(\d{1,2}):(\d{2})$/.exec(timeHHmm);
+  if (!match) return timeHHmm;
+
+  const hours24 = Number(match[1]);
+  const minutes = match[2];
+
+  const ampm = hours24 >= 12 ? 'p.m.' : 'a.m.';
+  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
+
+  return `${hours12}:${minutes} ${ampm}`;
+}
+
 export function Schedule() {
   const [time, setTime] = useState('');
   const [leadMs, setLeadMs] = useState('0');
@@ -46,7 +60,7 @@ export function Schedule() {
     return (
       <div className="flex items-center justify-between gap-2">
         <div className="text-sm font-medium">
-          Drop time {time} with lead {leadMs} ms
+          Drop time {formatTime12h(time)} with lead {leadMs} ms
         </div>
         <Button size="sm" variant="secondary" onClick={handleCancel}>
           Cancel
