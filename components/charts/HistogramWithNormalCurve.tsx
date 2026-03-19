@@ -164,7 +164,7 @@ export function HistogramWithNormalCurve({
                 y={yTop}
                 fill="var(--color-muted-foreground)"
                 opacity={0.8}
-                fontSize={8}
+                fontSize={10}
                 textAnchor="start"
               >
                 {band.label}
@@ -193,7 +193,7 @@ export function HistogramWithNormalCurve({
                 y={axisY + 18}
                 fill="var(--color-muted-foreground)"
                 opacity={0.95}
-                fontSize={8}
+                fontSize={10}
                 textAnchor="middle"
               >
                 {formatMsOrSeconds(mean)}
@@ -230,7 +230,7 @@ export function HistogramWithNormalCurve({
                 y={axisY + 18}
                 fill="var(--color-foreground)"
                 opacity={0.95}
-                fontSize={8}
+                fontSize={10}
                 textAnchor="middle"
               >
                 {formatMsOrSeconds(tickX)}

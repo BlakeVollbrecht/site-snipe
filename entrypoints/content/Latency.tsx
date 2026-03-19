@@ -30,11 +30,11 @@ function LatencyStatsView({
   if (!stats) return null;
 
   return (
-    <div className="grid grid-cols-4 gap-x-4 gap-y-2 items-start">
-      <div className="col-span-3 min-w-0">
+    <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-x-4 gap-y-2 items-start">
+      <div className="min-[480px]:col-span-2 min-w-0">
         <HistogramWithNormalCurve samples={samples} />
       </div>
-      <dl className="col-span-1 space-y-2 text-[12px]">
+      <dl className="space-y-2 text-[12px] col-span-1">
         <div className="flex items-center gap-2">
           <dt className="font-medium">Mean (ms):</dt>
           <dd className="font-mono tabular-nums">{stats.meanOffset}</dd>
@@ -126,15 +126,35 @@ function LatencyMeasureSection({
   }, []);
 
   return (
-    <section className="mt-3 pt-2 border-t border-border">
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-sm font-medium">{title}</span>
+    <section className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-muted-foreground">{title}</span>
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={handleToggle}>
             {running ? 'Stop' : 'Measure'}
           </Button>
-          <Button size="sm" variant="secondary" onClick={handleReset} type="button">
-            Reset
+          <Button
+            size="icon-sm"
+            variant="secondary"
+            onClick={handleReset}
+            type="button"
+            title="Reset latency samples"
+            aria-label="Reset latency samples"
+          >
+            {/* Simple inline reset icon to keep the control compact. */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-4"
+            >
+              <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+              <polyline points="21 3 21 9 15 9" />
+            </svg>
           </Button>
         </div>
       </div>
@@ -151,13 +171,13 @@ function OwnServerLatencySection() {
   return (
     <LatencyMeasureSection
       title="Own server"
-      hint="Click Measure to compute latency vs your own server."
+      hint="Measure latency vs your own server."
       measureOnce={async () =>
         (await browser.runtime.sendMessage({
           type: 'site-snipe:get-latency-stats',
           samples: 1,
         })) as LatencyStats}
-      getNextDelayMs={() => 1000}
+      getNextDelayMs={() => 500}
     />
   );
 }
@@ -166,7 +186,7 @@ function CurrentPageLatencySection() {
   return (
     <LatencyMeasureSection
       title="Current page"
-      hint="Click Measure to start live round-trip latency sampling for this page."
+      hint="Measure latency for this page (1/2 round-trip)."
       measureOnce={() => measureCurrentPageLatency(1)}
       getNextDelayMs={() => 250 + Math.random() * 500}
     />
@@ -175,8 +195,7 @@ function CurrentPageLatencySection() {
 
 export function Latency() {
   return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-medium">Latency</h2>
+    <div className="space-y-2">
       <OwnServerLatencySection />
       <CurrentPageLatencySection />
     </div>

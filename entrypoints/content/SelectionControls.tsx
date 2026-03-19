@@ -16,7 +16,7 @@ export function SelectionControls() {
   };
 
   return (
-    <div className="flex flex-wrap gap-2 mb-2">
+    <div className="flex flex-wrap gap-2">
       <Button size="sm" onClick={handleSelectClick} disabled={isSelectionArmed()}>
         Select element on page
       </Button>
