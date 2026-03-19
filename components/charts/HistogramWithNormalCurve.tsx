@@ -91,6 +91,7 @@ export function HistogramWithNormalCurve({
   return (
     <svg
       width="100%"
+      style={{ aspectRatio: `${width} / ${height}` }}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
       aria-label="Histogram"

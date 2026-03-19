@@ -30,15 +30,21 @@ function LatencyStatsView({
   if (!stats) return null;
 
   return (
-    <div className="space-y-2">
-      <HistogramWithNormalCurve samples={samples} />
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-        <div>
-          <dt className="font-medium">Std dev (ms)</dt>
+    <div className="grid grid-cols-4 gap-x-4 gap-y-2 items-start">
+      <div className="col-span-3 min-w-0">
+        <HistogramWithNormalCurve samples={samples} />
+      </div>
+      <dl className="col-span-1 space-y-2 text-[12px]">
+        <div className="flex items-center gap-2">
+          <dt className="font-medium">Mean (ms):</dt>
+          <dd className="font-mono tabular-nums">{stats.meanOffset}</dd>
+        </div>
+        <div className="flex items-center gap-2">
+          <dt className="font-medium">Std dev (ms):</dt>
           <dd className="font-mono tabular-nums">{stats.stdDev}</dd>
         </div>
-        <div>
-          <dt className="font-medium"># samples</dt>
+        <div className="flex items-center gap-2">
+          <dt className="font-medium"># samples:</dt>
           <dd className="font-mono tabular-nums">{samples.length}</dd>
         </div>
       </dl>
